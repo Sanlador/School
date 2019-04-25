@@ -1,0 +1,32 @@
+
+
+
+/**
+ ** glui buttons callback:
+ **/
+
+void
+Buttons( int id )
+{
+	switch( id )
+	{
+		case RESET:
+			Reset();
+			break;
+
+		case QUIT:
+			/* gracefully close the glui window:				*/
+			/* gracefully close out the graphics:				*/
+			/* gracefully close the graphics window:			*/
+			/* gracefully exit the program:					*/
+
+			Glui->close();
+
+			glutSetWindow( GrWindow );
+			glFinish();
+			glutDestroyWindow( GrWindow );
+			exit( 0 );
+	}
+
+	Glui->sync_live();
+}

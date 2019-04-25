@@ -1,14 +1,6 @@
 ﻿  sample.cpp
-c:\users\sanlador\documents\github\school\cs553\sample2017\glui.h(760): warning C4244: 'argument': conversion from 'double' to 'GLfloat', possible loss of data
-c:\users\sanlador\documents\github\school\cs553\sample2017\sample.cpp(165): warning C4305: 'initializing': truncation from 'double' to 'float'
-c:\users\sanlador\documents\github\school\cs553\sample2017\sample.cpp(165): warning C4305: 'initializing': truncation from 'double' to 'const float'
-c:\users\sanlador\documents\github\school\cs553\sample2017\sample.cpp(166): warning C4305: 'initializing': truncation from 'double' to 'float'
-c:\users\sanlador\documents\github\school\cs553\sample2017\sample.cpp(166): warning C4305: 'initializing': truncation from 'double' to 'const float'
-c:\users\sanlador\documents\github\school\cs553\sample2017\sample.cpp(167): warning C4305: 'initializing': truncation from 'double' to 'float'
-c:\users\sanlador\documents\github\school\cs553\sample2017\sample.cpp(167): warning C4305: 'initializing': truncation from 'double' to 'const float'
-c:\users\sanlador\documents\github\school\cs553\sample2017\sample.cpp(168): warning C4305: 'initializing': truncation from 'double' to 'float'
-c:\users\sanlador\documents\github\school\cs553\sample2017\sample.cpp(168): warning C4305: 'initializing': truncation from 'double' to 'const float'
-c:\users\sanlador\documents\github\school\cs553\sample2017\sample.cpp(600): warning C4101: 'xPrime': unreferenced local variable
-c:\users\sanlador\documents\github\school\cs553\sample2017\sample.cpp(600): warning C4101: 'yPrime': unreferenced local variable
+c:\users\volunteer\desktop\sample2017\glui.h(760): warning C4244: 'argument': conversion from 'double' to 'GLfloat', possible loss of data
+c:\users\volunteer\desktop\sample2017\sample.cpp(600): warning C4101: 'xPrime': unreferenced local variable
+c:\users\volunteer\desktop\sample2017\sample.cpp(600): warning C4101: 'yPrime': unreferenced local variable
 sample.obj : warning LNK4075: ignoring '/EDITANDCONTINUE' due to '/INCREMENTAL:NO' specification
-  Sample.vcxproj -> C:\Users\Sanlador\Documents\GitHub\School\CS553\Sample2017\.\Debug\Sample.exe
+  Sample.vcxproj -> C:\Users\Volunteer\Desktop\Sample2017\.\Debug\Sample.exe

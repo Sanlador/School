@@ -162,18 +162,18 @@ const float CONTOUR_WIDTH = { 2. };
 
 // ranges and scalar function:
 
-const float XMIN = { -36.56 };
-const float XMAX = {  36.56 };
-const float YMIN = { -22.65 };
-const float YMAX = {  22.65 };
-const float ZMIN = { -1.00 };
-const float ZMAX = {  1.00 };
-const float RMIN = {  0.00 };
+const float XMIN = { -36.56f };
+const float XMAX = {  36.56f };
+const float YMIN = { -22.65f };
+const float YMAX = {  22.65f };
+const float ZMIN = { -1.00f };
+const float ZMAX = {  1.00f };
+const float RMIN = {  0.00f };
 const float RMAX = {  1.732f };
-const float GMIN = {  0.00 };
-const float GMAX = { 300.00 };
-const float KMIN = { 1.00 };
-const float KMAX = { 100.00 };
+const float GMIN = {  0.00f };
+const float GMAX = { 300.00f };
+const float KMIN = { 1.00f };
+const float KMAX = { 100.00f };
 
 
 const float SMIN = {   0.0 };
@@ -394,24 +394,24 @@ void drawHyp(float x0, float x1, float y0, float y1)
 	float AY = (y1 + y0) / 2.f;
 
 	float r = sqrt(SQR(AX + XLowHigh[0]) + SQR(AY + YLowHigh[0]));
-	float rPrime = r / (r + GLowHigh[0]);
+	float rPrime = r / (r + KLowHigh[0]);
 	float AXPrime = (AX + XLowHigh[0]) / (r + KLowHigh[0]);
 	float AYPrime = (AY + YLowHigh[0]) / (r + KLowHigh[0]);
 
 	r = sqrt(SQR(x0 + XLowHigh[0]) + SQR(y0 + YLowHigh[0]));
-	rPrime = r / (r + GLowHigh[0]);
+	//rPrime = r / (r + KLowHigh[0]);
 	float x0Prime = (x0 + XLowHigh[0]) / (r + KLowHigh[0]);
 	float y0Prime = (y0 + YLowHigh[0]) / (r + KLowHigh[0]);
 
-	r = sqrt(SQR(x0 + XLowHigh[0]) + SQR(y0 + YLowHigh[0]));
-	rPrime = r / (r + GLowHigh[0]);
+	r = sqrt(SQR(x1 + XLowHigh[0]) + SQR(y1 + YLowHigh[0]));
+	//rPrime = r / (r + KLowHigh[0]);
 	float x1Prime = (x1 + XLowHigh[0]) / (r + KLowHigh[0]);
 	float y1Prime = (y1 + YLowHigh[0]) / (r + KLowHigh[0]);
 
 	float BX = (x1Prime + x0Prime) / 2.f;
 	float BY = (y1Prime + y0Prime) / 2.f;
 
-	if (sqrt(SQR(BX - AXPrime) + SQR(BY - AYPrime)) < 1.f)
+	if (sqrt(SQR(BX - AXPrime) + SQR(BY - AYPrime)) < .000001f)
 	{
 		glVertex2f(x0Prime, y0Prime);
 		glVertex2f(x1Prime, y1Prime);
