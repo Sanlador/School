@@ -172,7 +172,7 @@ const float RMIN = {  0.00f };
 const float RMAX = {  1.732f };
 const float GMIN = {  0.00f };
 const float GMAX = { 300.00f };
-const float KMIN = { 1.00f };
+const float KMIN = { 10.00f };
 const float KMAX = { 100.00f };
 
 
@@ -221,6 +221,7 @@ GLUI *		Glui;				// instance of glui window
 int		GluiWindow;			// the glut id for the glui window
 int		Grayscale;			// display in grayscale
 int		Cartesian;
+int		draw;
 int		MainWindow;			// window id for main graphics window
 int		PointsOn;			// display points
 int		jitter;
@@ -390,6 +391,7 @@ Buttons( int id )
 
 void drawHyp(float x0, float x1, float y0, float y1)
 {
+	std::cout << x0 << "\n";
 	float AX = (x1 + x0) / 2.f;
 	float AY = (y1 + y0) / 2.f;
 
@@ -398,19 +400,43 @@ void drawHyp(float x0, float x1, float y0, float y1)
 	float AXPrime = (AX + XLowHigh[0]) / (r + KLowHigh[0]);
 	float AYPrime = (AY + YLowHigh[0]) / (r + KLowHigh[0]);
 
+	if (Cartesian)
+	{
+		AXPrime = AXPrime / sqrt(SQR(AXPrime) + SQR(KLowHigh[0]));
+		AYPrime = AYPrime / sqrt(SQR(AYPrime) + SQR(KLowHigh[0]));
+	}
+
 	r = sqrt(SQR(x0 + XLowHigh[0]) + SQR(y0 + YLowHigh[0]));
 	//rPrime = r / (r + KLowHigh[0]);
 	float x0Prime = (x0 + XLowHigh[0]) / (r + KLowHigh[0]);
 	float y0Prime = (y0 + YLowHigh[0]) / (r + KLowHigh[0]);
+
+	if (Cartesian)
+	{
+		x0Prime = x0Prime / sqrt(SQR(x0Prime) + SQR(KLowHigh[0]));
+		y0Prime = y0Prime / sqrt(SQR(y0Prime) + SQR(KLowHigh[0]));
+	}
 
 	r = sqrt(SQR(x1 + XLowHigh[0]) + SQR(y1 + YLowHigh[0]));
 	//rPrime = r / (r + KLowHigh[0]);
 	float x1Prime = (x1 + XLowHigh[0]) / (r + KLowHigh[0]);
 	float y1Prime = (y1 + YLowHigh[0]) / (r + KLowHigh[0]);
 
+	if (Cartesian)
+	{
+		x1Prime = x1Prime / sqrt(SQR(x1Prime) + SQR(KLowHigh[0]));
+		y1Prime = y1Prime / sqrt(SQR(y1Prime) + SQR(KLowHigh[0]));
+	}
+
 	float BX = (x1Prime + x0Prime) / 2.f;
 	float BY = (y1Prime + y0Prime) / 2.f;
 
+	if (Cartesian)
+	{
+		BX = BX / sqrt(SQR(BX) + SQR(KLowHigh[0]));
+		BY = BY / sqrt(SQR(BY) + SQR(KLowHigh[0]));
+	}
+	
 	if (sqrt(SQR(BX - AXPrime) + SQR(BY - AYPrime)) < .000001f)
 	{
 		glVertex2f(x0Prime, y0Prime);
@@ -606,21 +632,26 @@ Display( )
 		{
 			x = Xdat[i][j];
 			y = Ydat[i][j];
-			if (j < Npts[i] - 1)
-				drawHyp(x, Xdat[i][j + 1], y, Ydat[i][j + 1]);
 
-			/*float r = sqrt(SQR(Xdat[i][j] + XLowHigh[0]) + SQR(Ydat[i][j] + YLowHigh[0]));
-			xPrime = (x + XLowHigh[0]) / (r + KLowHigh[0]);
-			yPrime = (y + YLowHigh[0]) / (r + KLowHigh[0]);
-
-			if (Cartesian)
+			if (draw)
 			{
-				xPrime = xPrime / sqrt(SQR(xPrime) + SQR(KLowHigh[0]));
-				yPrime = yPrime / sqrt(SQR(yPrime) + SQR(KLowHigh[0]));
+				if (j < Npts[i] - 1)
+					drawHyp(x, Xdat[i][j + 1], y, Ydat[i][j + 1]);
 			}
+			else
+			{
+				float r = sqrt(SQR(Xdat[i][j] + XLowHigh[0]) + SQR(Ydat[i][j] + YLowHigh[0]));
+				xPrime = (x + XLowHigh[0]) / (r + KLowHigh[0]);
+				yPrime = (y + YLowHigh[0]) / (r + KLowHigh[0]);
 
-			glVertex2f(xPrime, yPrime);
-			*/
+				if (Cartesian)
+				{
+					xPrime = xPrime / sqrt(SQR(xPrime) + SQR(KLowHigh[0]));
+					yPrime = yPrime / sqrt(SQR(yPrime) + SQR(KLowHigh[0]));
+				}
+
+				glVertex2f(xPrime, yPrime);
+			}
 		}
 		glEnd();
 	}
@@ -897,6 +928,7 @@ InitGlui( )
 	Glui->add_checkbox_to_panel(panel, "Jitter", &jitter);
 	Glui->add_checkbox( "Grayscale", &Grayscale );
 	Glui->add_checkbox("Cartesian", &Cartesian);
+	Glui->add_checkbox("Fix T-Intersections", &draw);
 
 	GLUI_Rollout * rollout = Glui->add_rollout( "Range Sliders", true );
 	GLUI_HSlider * slider = Glui->add_slider_to_panel(rollout, false, GLUI_HSLIDER_FLOAT, KLowHigh, K, (GLUI_Update_CB)Sliders);
@@ -1342,6 +1374,7 @@ Reset( )
 	DepthCueOn = 0;
 	Grayscale = GLUIFALSE;
 	Cartesian = GLUIFALSE;
+	draw = GLUIFALSE;
 	jitter = GLUIFALSE;
 	PointsOn = GLUITRUE;
 	Scale  = 1.0;
