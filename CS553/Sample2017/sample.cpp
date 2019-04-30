@@ -73,7 +73,7 @@ struct node
 
 // title of these windows:
 
-const char *WINDOWTITLE = { "OpenGL / GLUT Sample -- Joe Graphics" };
+const char *WINDOWTITLE = { "Assignment 4 - Richard Cunard" };
 const char *GLUITITLE   = { "User Interface Window" };
 
 
@@ -172,7 +172,7 @@ const float RMIN = {  0.00f };
 const float RMAX = {  1.732f };
 const float GMIN = {  0.00f };
 const float GMAX = { 300.00f };
-const float KMIN = { 10.00f };
+const float KMIN = { 1.00f };
 const float KMAX = { 100.00f };
 
 
@@ -391,7 +391,6 @@ Buttons( int id )
 
 void drawHyp(float x0, float x1, float y0, float y1)
 {
-	std::cout << x0 << "\n";
 	float AX = (x1 + x0) / 2.f;
 	float AY = (y1 + y0) / 2.f;
 
@@ -400,45 +399,26 @@ void drawHyp(float x0, float x1, float y0, float y1)
 	float AXPrime = (AX + XLowHigh[0]) / (r + KLowHigh[0]);
 	float AYPrime = (AY + YLowHigh[0]) / (r + KLowHigh[0]);
 
-	if (Cartesian)
-	{
-		AXPrime = AXPrime / sqrt(SQR(AXPrime) + SQR(KLowHigh[0]));
-		AYPrime = AYPrime / sqrt(SQR(AYPrime) + SQR(KLowHigh[0]));
-	}
-
 	r = sqrt(SQR(x0 + XLowHigh[0]) + SQR(y0 + YLowHigh[0]));
-	//rPrime = r / (r + KLowHigh[0]);
 	float x0Prime = (x0 + XLowHigh[0]) / (r + KLowHigh[0]);
 	float y0Prime = (y0 + YLowHigh[0]) / (r + KLowHigh[0]);
 
-	if (Cartesian)
-	{
-		x0Prime = x0Prime / sqrt(SQR(x0Prime) + SQR(KLowHigh[0]));
-		y0Prime = y0Prime / sqrt(SQR(y0Prime) + SQR(KLowHigh[0]));
-	}
-
 	r = sqrt(SQR(x1 + XLowHigh[0]) + SQR(y1 + YLowHigh[0]));
-	//rPrime = r / (r + KLowHigh[0]);
 	float x1Prime = (x1 + XLowHigh[0]) / (r + KLowHigh[0]);
 	float y1Prime = (y1 + YLowHigh[0]) / (r + KLowHigh[0]);
 
-	if (Cartesian)
-	{
-		x1Prime = x1Prime / sqrt(SQR(x1Prime) + SQR(KLowHigh[0]));
-		y1Prime = y1Prime / sqrt(SQR(y1Prime) + SQR(KLowHigh[0]));
-	}
-
 	float BX = (x1Prime + x0Prime) / 2.f;
 	float BY = (y1Prime + y0Prime) / 2.f;
-
-	if (Cartesian)
-	{
-		BX = BX / sqrt(SQR(BX) + SQR(KLowHigh[0]));
-		BY = BY / sqrt(SQR(BY) + SQR(KLowHigh[0]));
-	}
 	
 	if (sqrt(SQR(BX - AXPrime) + SQR(BY - AYPrime)) < .000001f)
 	{
+		if (Cartesian)
+		{
+			x0Prime = x0Prime / sqrt(SQR(x0Prime) + SQR(KLowHigh[0]));
+			y0Prime = y0Prime / sqrt(SQR(y0Prime) + SQR(KLowHigh[0]));
+			x1Prime = x1Prime / sqrt(SQR(x1Prime) + SQR(KLowHigh[0]));
+			y1Prime = y1Prime / sqrt(SQR(y1Prime) + SQR(KLowHigh[0]));
+		}
 		glVertex2f(x0Prime, y0Prime);
 		glVertex2f(x1Prime, y1Prime);
 	}
@@ -932,7 +912,7 @@ InitGlui( )
 
 	GLUI_Rollout * rollout = Glui->add_rollout( "Range Sliders", true );
 	GLUI_HSlider * slider = Glui->add_slider_to_panel(rollout, false, GLUI_HSLIDER_FLOAT, KLowHigh, K, (GLUI_Update_CB)Sliders);
-	slider->set_float_limits(KLowHigh[0], KLowHigh[1]);
+	slider->set_float_limits(KMIN, KMAX);
 	slider->set_slider_val(KLowHigh[0], KLowHigh[1]);
 	slider->set_w(SLIDERWIDTH);
 	sprintf(str, KFORMAT, KLowHigh[0], KLowHigh[1]);
@@ -948,7 +928,7 @@ InitGlui( )
 	Glui->add_separator_to_panel( rollout );*/
 
 	slider = Glui->add_slider_to_panel( rollout, false, GLUI_HSLIDER_FLOAT, XLowHigh, X, (GLUI_Update_CB) Sliders );
-	slider->set_float_limits( XLowHigh[0], XLowHigh[1] );
+	slider->set_float_limits( XMIN, XMAX );
 	slider->set_slider_val( XLowHigh[0], XLowHigh[1] );
 	slider->set_w( SLIDERWIDTH );
 	sprintf( str, XFORMAT, XLowHigh[0], XLowHigh[1] );
@@ -956,7 +936,7 @@ InitGlui( )
 	Glui->add_separator_to_panel( rollout );
 
 	slider = Glui->add_slider_to_panel( rollout, false, GLUI_HSLIDER_FLOAT, YLowHigh, Y, (GLUI_Update_CB) Sliders );
-	slider->set_float_limits( YLowHigh[0], YLowHigh[1] );
+	slider->set_float_limits( YMIN, YMAX );
 	slider->set_slider_val( YLowHigh[0], YLowHigh[1] );
 	slider->set_w( SLIDERWIDTH );
 	sprintf( str, YFORMAT, YLowHigh[0], YLowHigh[1] );
@@ -1394,9 +1374,9 @@ Reset( )
 
 	SLowHigh[0] = SMIN;
 	SLowHigh[1] = SMAX;
-	XLowHigh[0] = XMIN;
+	XLowHigh[0] = 0.f;
 	XLowHigh[1] = XMAX;
-	YLowHigh[0] = YMIN;
+	YLowHigh[0] = 0.f;
 	YLowHigh[1] = YMAX;
 	ZLowHigh[0] = ZMIN;
 	ZLowHigh[1] = ZMAX;
@@ -1404,7 +1384,7 @@ Reset( )
 	RLowHigh[1] = RMAX;
 	GLowHigh[0] = GMIN;
 	GLowHigh[1] = GMAX;
-	KLowHigh[0] = KMIN;
+	KLowHigh[0] = 10.f;
 	KLowHigh[1] = KMAX;
 }
 

@@ -93,21 +93,22 @@ ray.init(num_cpus=4, include_webui=False, ignore_reinit_error=True, redis_max_me
 
 # This function is a proxy for a more interesting and computationally
 # intensive function.
-
+@ray.remote
 def slow_function(i):
-    time.sleep(1)
+    time.sleep(1.0)
     return i
-
 
 # **EXERCISE:** The loop below takes too long. The four function calls could be executed in parallel. Instead of four seconds, it should only take one second. Once `slow_function` has been made a remote function, execute these four tasks in parallel by calling `slow_function.remote()`. Then obtain the results by calling `ray.get` on a list of the resulting object IDs.
 
 # Sleep a little to improve the accuracy of the timing measurements below.
 # We do this because workers may still be starting up in the background.
-time.sleep(10.0)
+time.sleep(5.0)
 start_time = time.time()
 
-results = [slow_function(i) for i in range(4)]
-
+results = [(slow_function.remote(i)) for i in range(4)]
+for i in range(4):
+    results[i] = ray.get(results[i])
+    
 end_time = time.time()
 duration = end_time - start_time
 
@@ -186,19 +187,22 @@ print('Success! The example took {} seconds.'.format(duration))
 # 
 # **EXERCISE:** You will need to turn all of these functions into remote functions. When you turn these functions into remote function, you do not have to worry about whether the caller passes in an object ID or a regular object. In both cases, the arguments will be regular objects when the function executes. This means that even if you pass in an object ID, you **do not need to call `ray.get`** inside of these remote functions.
 
-
+@ray.remote
 def load_data(filename):
     time.sleep(0.1)
     return np.ones((1000, 100))
 
+@ray.remote
 def normalize_data(data):
     time.sleep(0.1)
     return data - np.mean(data, axis=0)
 
+@ray.remote
 def extract_features(normalized_data):
     time.sleep(0.1)
     return np.hstack([normalized_data, normalized_data ** 2])
 
+@ray.remote
 def compute_loss(features):
     num_data, dim = features.shape
     time.sleep(0.1)
@@ -225,10 +229,10 @@ losses = []
 for filename in ['file1', 'file2', 'file3', 'file4']:
     inner_start = time.time()
 
-    data = load_data(filename)
-    normalized_data = normalize_data(data)
-    features = extract_features(normalized_data)
-    loss = compute_loss(features)
+    data = load_data.remote(filename)
+    normalized_data = normalize_data.remote(data)
+    features = extract_features.remote(normalized_data)
+    loss = compute_loss.remote(features)
     losses.append(loss)
     
     inner_end = time.time()
@@ -237,7 +241,9 @@ for filename in ['file1', 'file2', 'file3', 'file4']:
         raise Exception('You may be calling ray.get inside of the for loop! '
                         'Doing this will prevent parallelism from being exposed. '
                         'Make sure to only call ray.get once outside of the for loop.')
-
+for i in range(len(losses)):
+    losses[i] = ray.get(losses[i])
+    
 print('The losses are {}.'.format(losses) + '\n')
 loss = sum(losses)
 
@@ -321,7 +327,7 @@ print('Success! The example took {} seconds.'.format(duration))
 
 # In[12]:
 
-
+@ray.remote
 class Foo(object):
     def __init__(self):
         self.counter = 0
@@ -341,8 +347,8 @@ assert hasattr(Foo, 'remote'), 'You need to turn "Foo" into an actor with @ray.r
 
 
 # Create two Foo objects.
-f1 = Foo()
-f2 = Foo()
+f1 = Foo.remote()
+f2 = Foo.remote()
 
 
 # **EXERCISE:** Parallelize the code below. The two actors can execute methods in parallel (though each actor can only execute one method at a time).
@@ -354,8 +360,8 @@ start_time = time.time()
 
 # Reset the actor state so that we can run this cell multiple times without
 # changing the results.
-f1.reset()
-f2.reset()
+f1.reset.remote()
+f2.reset.remote()
 
 # We want to parallelize this code. However, it is not straightforward to
 # make "increment" a remote function, because state is shared (the value of
@@ -363,9 +369,12 @@ f2.reset()
 # makes sense to use actors.
 results = []
 for _ in range(5):
-    results.append(f1.increment())
-    results.append(f2.increment())
+    results.append(f1.increment.remote())
+    results.append(f2.increment.remote())
 
+for i in range(10):
+    results[i] = ray.get(results[i])
+    
 end_time = time.time()
 duration = end_time - start_time
 
@@ -433,7 +442,8 @@ start_time = time.time()
 result_ids = [f.remote(i) for i in range(6)]
 # Get one batch of tasks. Instead of waiting for a fixed subset of tasks, we
 # should instead use the first 3 tasks that finish.
-initial_results = ray.get(result_ids[:3])
+ready_ids, remaining_ids = ray.wait(result_ids, num_returns=3, timeout=None)
+initial_results = ray.get(ready_ids)
 
 end_time = time.time()
 duration = end_time - start_time
@@ -445,7 +455,7 @@ duration = end_time - start_time
 
 
 # Wait for the remaining tasks to complete.
-remaining_results = ray.get(result_ids[3:])
+remaining_results = ray.get(remaining_ids)
 
 
 # **VERIFY:** Run some checks to verify that the changes you made to the code were correct. Some of the checks should fail when you initially run the cells. After completing the exercises, the checks should pass.
@@ -570,7 +580,8 @@ def use_weights(weights, i):
 time.sleep(2.0)
 start_time = time.time()
 
-results = ray.get([use_weights.remote(neural_net_weights, i)
+NNID = ray.put(neural_net_weights)
+results = ray.get([use_weights.remote(NNID, i)
                    for i in range(20)])
 
 end_time = time.time()
