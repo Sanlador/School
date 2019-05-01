@@ -1,4 +1,19 @@
 ﻿  sample.cpp
-c:\users\sanlador\documents\github\school\cs553\sample2017\glui.h(760): warning C4244: 'argument': conversion from 'double' to 'GLfloat', possible loss of data
-sample.obj : warning LNK4075: ignoring '/EDITANDCONTINUE' due to '/INCREMENTAL:NO' specification
-  Sample.vcxproj -> C:\Users\Sanlador\Documents\GitHub\School\CS553\Sample2017\.\Debug\Sample.exe
+c:\users\volunteer\documents\github\school\cs553\sample2017\glui.h(760): warning C4244: 'argument': conversion from 'double' to 'GLfloat', possible loss of data
+c:\users\volunteer\documents\github\school\cs553\sample2017\sample.cpp(72): warning C4244: 'initializing': conversion from 'double' to 'float', possible loss of data
+c:\users\volunteer\documents\github\school\cs553\sample2017\sample.cpp(73): warning C4244: 'initializing': conversion from 'double' to 'float', possible loss of data
+c:\users\volunteer\documents\github\school\cs553\sample2017\sample.cpp(74): warning C4244: 'initializing': conversion from 'double' to 'float', possible loss of data
+c:\users\volunteer\documents\github\school\cs553\sample2017\sample.cpp(75): warning C4244: 'initializing': conversion from 'double' to 'float', possible loss of data
+c:\users\volunteer\documents\github\school\cs553\sample2017\sample.cpp(76): warning C4244: 'initializing': conversion from 'double' to 'float', possible loss of data
+c:\users\volunteer\documents\github\school\cs553\sample2017\sample.cpp(77): warning C4244: 'initializing': conversion from 'double' to 'float', possible loss of data
+c:\users\volunteer\documents\github\school\cs553\sample2017\sample.cpp(88): warning C4244: '=': conversion from 'double' to 'float', possible loss of data
+c:\users\volunteer\documents\github\school\cs553\sample2017\sample.cpp(89): warning C4244: '=': conversion from 'double' to 'float', possible loss of data
+c:\users\volunteer\documents\github\school\cs553\sample2017\sample.cpp(90): warning C4244: '=': conversion from 'double' to 'float', possible loss of data
+c:\users\volunteer\documents\github\school\cs553\sample2017\sample.cpp(91): warning C4244: '=': conversion from 'double' to 'float', possible loss of data
+c:\users\volunteer\documents\github\school\cs553\sample2017\sample.cpp(92): warning C4244: '=': conversion from 'double' to 'float', possible loss of data
+c:\users\volunteer\documents\github\school\cs553\sample2017\sample.cpp(93): warning C4244: '=': conversion from 'double' to 'float', possible loss of data
+c:\users\volunteer\documents\github\school\cs553\sample2017\sample.cpp(715): error C2109: subscript requires array or pointer type
+c:\users\volunteer\documents\github\school\cs553\sample2017\sample.cpp(715): error C2228: left of '.tail' must have class/struct/union
+c:\users\volunteer\documents\github\school\cs553\sample2017\sample.cpp(715): error C2228: left of '.head' must have class/struct/union
+c:\users\volunteer\documents\github\school\cs553\sample2017\sample.cpp(715): error C3861: 'Arrow': identifier not found
+c:\users\volunteer\documents\github\school\cs553\sample2017\sample.cpp(1236): warning C4244: 'argument': conversion from 'double' to 'float', possible loss of data

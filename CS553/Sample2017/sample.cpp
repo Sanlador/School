@@ -46,6 +46,66 @@ struct node
 	float grad;             // total gradient
 };
 
+
+class vector
+{
+	float x, y, z;
+	float vxp, vyp, vzp;
+	float r, g, b;
+	float curl, speed;
+	float head[3], tail[3];
+public: 
+	vector()
+	{
+
+	}
+
+	vector(float xIn, float yIn, float zIn, int step)
+	{
+		x = xIn;
+		y = yIn;
+		z = zIn;
+		vxp = y * z * (y*y + z * z);
+		vyp = x * z * (x*x + z * z);
+		vzp = x * y * (x*x + y * y);
+
+		float dvxdy = 3.*y*y*z + z * z*z;
+		float dvxdz = 3.*y*z*z + y * y*y;
+		float dvydx = 3.*x*x*z + z * z*z;
+		float dvydz = 3.*x*z*z + x * x*x;
+		float dvzdx = 3.*x*x*y + y * y*y;
+		float dvzdy = 3.*x*y*y + x * x*x;
+
+		float cx = dvzdy - dvydz;
+		float cy = dvxdz - dvzdx;
+		float cz = dvydx - dvxdy;
+
+		curl = sqrt(cx*cx + cy * cy + cz * cz);
+		speed = sqrt(SQR(vxp) + SQR(vyp) + SQR(vzp));
+		r = 1.f;
+		g = b = 0.f;
+
+		tail[0] = x - .5 * 1 / ((float)step) * vxp;
+		tail[1] = y - .5 * 1 / ((float)step) * vyp;
+		tail[2] = z - .5 * 1 / ((float)step) * vzp;
+		head[0] = x + .5 * 1 / ((float)step) * vxp;
+		head[1] = y + .5 * 1 / ((float)step) * vyp;
+		head[2] = z + .5 * 1 / ((float)step) * vzp;
+	}
+
+	float getCurl()
+	{
+		return curl;
+	}
+
+	float getSpeed()
+	{
+		return speed;
+	}
+};
+
+
+
 //	This is a sample OpenGL / GLUT / GLUI program
 //
 //	The objective is to draw a 3d object and change the color of the axes
@@ -161,11 +221,19 @@ const float CONTOUR_WIDTH = { 2. };
 
 
 // ranges and scalar function:
-
+/*
+//project 4
 const float XMIN = { -36.56f };
 const float XMAX = {  36.56f };
 const float YMIN = { -22.65f };
 const float YMAX = {  22.65f };
+*/
+
+//project 1 & 2
+const float XMIN = { -1.00f };
+const float XMAX = { 1.00f };
+const float YMIN = { -1.00f };
+const float YMAX = { 1.00f };
 const float ZMIN = { -1.00f };
 const float ZMAX = {  1.00f };
 const float RMIN = {  0.00f };
@@ -209,7 +277,7 @@ const int SLIDERWIDTH = { 200 };
 #define NZ	N
 
 struct node  Nodes[NX][NY][NZ];
-
+vector vect[N][N][N];
 // non-constant global variables
 
 int		ActiveButton;			// current button that is down
@@ -600,7 +668,7 @@ Display( )
 	}
 	glEnd();
 	*/
-
+	/*
 	//MARK Project 4
 
 	float x, y, xPrime, yPrime;
@@ -634,6 +702,19 @@ Display( )
 			}
 		}
 		glEnd();
+	}
+	*/
+
+	//project 6
+	for (int i = 0; i < N; i++)
+	{
+		for (int j = 0; j < N; j++)
+		{
+			for (int k = 0; k < N; k++)
+			{
+				
+			}
+		}
 	}
 
 	/*
@@ -902,30 +983,34 @@ InitGlui( )
 	Glui->add_statictext( (char *) GLUITITLE );
 	Glui->add_separator();
 
-
+	//Project 1 & 2
 	GLUI_Panel * panel = Glui->add_panel(  "" );
-	Glui->add_checkbox_to_panel( panel, "Points", &PointsOn );
+	//Glui->add_checkbox_to_panel( panel, "Points", &PointsOn );
 	Glui->add_checkbox_to_panel(panel, "Jitter", &jitter);
-	Glui->add_checkbox( "Grayscale", &Grayscale );
-	Glui->add_checkbox("Cartesian", &Cartesian);
-	Glui->add_checkbox("Fix T-Intersections", &draw);
 
-	GLUI_Rollout * rollout = Glui->add_rollout( "Range Sliders", true );
-	GLUI_HSlider * slider = Glui->add_slider_to_panel(rollout, false, GLUI_HSLIDER_FLOAT, KLowHigh, K, (GLUI_Update_CB)Sliders);
+
+	GLUI_Rollout * rollout = Glui->add_rollout("Range Sliders", true);
+
+	//Project 4
+	//Glui->add_checkbox( "Grayscale", &Grayscale );
+	//Glui->add_checkbox("Cartesian", &Cartesian);
+	//Glui->add_checkbox("Fix T-Intersections", &draw);
+
+	/*GLUI_HSlider * slider = Glui->add_slider_to_panel(rollout, false, GLUI_HSLIDER_FLOAT, KLowHigh, K, (GLUI_Update_CB)Sliders);
 	slider->set_float_limits(KMIN, KMAX);
 	slider->set_slider_val(KLowHigh[0], KLowHigh[1]);
 	slider->set_w(SLIDERWIDTH);
 	sprintf(str, KFORMAT, KLowHigh[0], KLowHigh[1]);
 	DistLabel = Glui->add_statictext_to_panel(rollout, str);
 	Glui->add_separator_to_panel(rollout);
-
-	/*GLUI_HSlider * slider = Glui->add_slider_to_panel( rollout, true, GLUI_HSLIDER_FLOAT, SLowHigh, S, (GLUI_Update_CB) Sliders );
+	
+	GLUI_HSlider * slider = Glui->add_slider_to_panel( rollout, false, GLUI_HSLIDER_FLOAT, SLowHigh, S, (GLUI_Update_CB) Sliders );
 	slider->set_float_limits( SLowHigh[0], SLowHigh[1] );
 	slider->set_slider_val( SLowHigh[0], SLowHigh[1] );
 	slider->set_w( SLIDERWIDTH );
 	sprintf( str, SFORMAT, SLowHigh[0], SLowHigh[1] );
 	SLabel = Glui->add_statictext_to_panel( rollout, str );
-	Glui->add_separator_to_panel( rollout );*/
+	Glui->add_separator_to_panel( rollout );
 
 	slider = Glui->add_slider_to_panel( rollout, false, GLUI_HSLIDER_FLOAT, XLowHigh, X, (GLUI_Update_CB) Sliders );
 	slider->set_float_limits( XMIN, XMAX );
@@ -934,8 +1019,27 @@ InitGlui( )
 	sprintf( str, XFORMAT, XLowHigh[0], XLowHigh[1] );
 	XLabel = Glui->add_statictext_to_panel( rollout, str );
 	Glui->add_separator_to_panel( rollout );
+	*/
 
-	slider = Glui->add_slider_to_panel( rollout, false, GLUI_HSLIDER_FLOAT, YLowHigh, Y, (GLUI_Update_CB) Sliders );
+	/*
+	//Project 1 & 2
+	GLUI_HSlider * slider = Glui->add_slider_to_panel( rollout, true, GLUI_HSLIDER_FLOAT, SLowHigh, S, (GLUI_Update_CB) Sliders );
+	slider->set_float_limits( SLowHigh[0], SLowHigh[1] );
+	slider->set_slider_val( SLowHigh[0], SLowHigh[1] );
+	slider->set_w( SLIDERWIDTH );
+	sprintf( str, SFORMAT, SLowHigh[0], SLowHigh[1] );
+	SLabel = Glui->add_statictext_to_panel( rollout, str );
+	Glui->add_separator_to_panel( rollout );
+
+	slider = Glui->add_slider_to_panel( rollout, true, GLUI_HSLIDER_FLOAT, XLowHigh, X, (GLUI_Update_CB) Sliders );
+	slider->set_float_limits( XMIN, XMAX );
+	slider->set_slider_val( XLowHigh[0], XLowHigh[1] );
+	slider->set_w( SLIDERWIDTH );
+	sprintf( str, XFORMAT, XLowHigh[0], XLowHigh[1] );
+	XLabel = Glui->add_statictext_to_panel( rollout, str );
+	Glui->add_separator_to_panel( rollout );
+
+	slider = Glui->add_slider_to_panel( rollout, true, GLUI_HSLIDER_FLOAT, YLowHigh, Y, (GLUI_Update_CB) Sliders );
 	slider->set_float_limits( YMIN, YMAX );
 	slider->set_slider_val( YLowHigh[0], YLowHigh[1] );
 	slider->set_w( SLIDERWIDTH );
@@ -943,7 +1047,7 @@ InitGlui( )
 	YLabel = Glui->add_statictext_to_panel( rollout, str );
 	Glui->add_separator_to_panel( rollout );
 
-	/*slider = Glui->add_slider_to_panel( rollout, true, GLUI_HSLIDER_FLOAT, ZLowHigh, Z, (GLUI_Update_CB) Sliders );
+	slider = Glui->add_slider_to_panel( rollout, true, GLUI_HSLIDER_FLOAT, ZLowHigh, Z, (GLUI_Update_CB) Sliders );
 	slider->set_float_limits( ZLowHigh[0], ZLowHigh[1] );
 	slider->set_slider_val( ZLowHigh[0], ZLowHigh[1] );
 	slider->set_w( SLIDERWIDTH );
@@ -967,8 +1071,6 @@ InitGlui( )
 	GLabel = Glui->add_statictext_to_panel( rollout, str );
 	Glui->add_separator_to_panel( rollout );
 
-	//Inserted Sliders
-
 	slider = Glui->add_slider_to_panel(rollout, true, GLUI_HSLIDER_FLOAT, TempLowHigh, TEMP, (GLUI_Update_CB)Sliders);
 	slider->set_float_limits(TempLowHigh[0], TempLowHigh[1]);
 	slider->set_slider_val(TempLowHigh[0], TempLowHigh[1]);
@@ -983,8 +1085,8 @@ InitGlui( )
 	slider->set_w(SLIDERWIDTH);
 	sprintf(str, DISTFORMAT, DistLowHigh[0], DistLowHigh[1]);
 	DistLabel = Glui->add_statictext_to_panel(rollout, str);
-	Glui->add_separator_to_panel(rollout);*/
-
+	Glui->add_separator_to_panel(rollout);
+	*/
 	
 
 	Glui->add_checkbox( "Perspective", &WhichProjection );
@@ -1039,9 +1141,11 @@ InitGlui( )
 // initialize the glut and OpenGL libraries:
 //	also setup display lists and callback functions
 
+
 void
 InitGraphics( )
 {
+	//projects 1 & 2
 	/*
 	for (int i = 0; i < N; i++)
 	{
@@ -1066,7 +1170,6 @@ InitGraphics( )
 			}
 		}
 	}
-	
 	for (int i = 0; i < N; i++)
 	{
 		for (int j = 0; j < N; j++)
@@ -1102,6 +1205,9 @@ InitGraphics( )
 	}
 
 	*/
+	
+	//project 4
+	/*
 	FILE *fp = fopen("proj04.dat", "r");
 	if (fp == NULL)
 	{
@@ -1118,6 +1224,19 @@ InitGraphics( )
 		}
 	}
 	fclose(fp);
+	*/
+
+	//project 6
+	for (int i = 0; i < N; i++)
+	{
+		for (int j = 0; j < N; j++)
+		{
+			for (int k = 0; k < N; k++)
+			{
+				vect[i][j][k] = vector(2. *(float)i / (float)N - 1., 2. *(float)j / (float)N - 1., 2. *(float)k / (float)N - 1., N);
+			}
+		}
+	}
 
 	// request the display modes:
 	// ask for red-green-blue-alpha color, double-buffering, and z-buffering:
@@ -1374,9 +1493,9 @@ Reset( )
 
 	SLowHigh[0] = SMIN;
 	SLowHigh[1] = SMAX;
-	XLowHigh[0] = 0.f;
+	XLowHigh[0] = XMIN;
 	XLowHigh[1] = XMAX;
-	YLowHigh[0] = 0.f;
+	YLowHigh[0] = YMIN;
 	YLowHigh[1] = YMAX;
 	ZLowHigh[0] = ZMIN;
 	ZLowHigh[1] = ZMAX;
