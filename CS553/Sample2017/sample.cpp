@@ -35,6 +35,186 @@ float			DistLowHigh[2] = { DISTMIN, DISTMAX };
 GLUI_StaticText *	TempLabel;
 GLUI_StaticText *	DistLabel;
 
+// size of wings as fraction of length:
+
+#define WINGS	0.10
+
+
+// axes:
+
+#define X	1
+#define Y	2
+#define Z	3
+
+// x, y, z, axes:
+
+static float axx[3] = { 1., 0., 0. };
+static float ayy[3] = { 0., 1., 0. };
+static float azz[3] = { 0., 0., 1. };
+
+
+
+// function declarations:
+
+void	Arrow(float[3], float[3]);
+void	Cross(float[3], float[3], float[3]);
+float	Dot(float[3], float[3]);
+float	Unit(float[3], float[3]);
+
+
+void
+Arrow(float tail[3], float head[3])
+{
+	float u[3], v[3], w[3];		// arrow coordinate system
+
+	// set w direction in u-v-w coordinate system:
+
+	w[0] = head[0] - tail[0];
+	w[1] = head[1] - tail[1];
+	w[2] = head[2] - tail[2];
+
+	// determine major direction:
+
+	int axis = X;
+	float mag = fabs(w[0]);
+	float f = fabs(w[1]);
+	if (f > mag)
+	{
+		axis = Y;
+		mag = f;
+	}
+	f = fabs(w[2]);
+	if (f > mag)
+	{
+		axis = Z;
+		mag = f;
+	}
+
+	// set size of wings and turn w into a unit vector:
+
+	float d = WINGS * Unit(w, w);
+
+	// draw the shaft of the arrow:
+
+	glBegin(GL_LINE_STRIP);
+	glVertex3fv(tail);
+	glVertex3fv(head);
+	glEnd();
+
+	// draw two sets of wings in the non-major directions:
+
+	float x, y, z;			// points to plot to
+	if (axis != X)
+	{
+		Cross(w, axx, v);
+		(void)Unit(v, v);
+		Cross(v, w, u);
+		x = head[0] + d * (u[0] - w[0]);
+		y = head[1] + d * (u[1] - w[1]);
+		z = head[2] + d * (u[2] - w[2]);
+		glBegin(GL_LINE_STRIP);
+		glVertex3fv(head);
+		glVertex3f(x, y, z);
+		glEnd();
+		x = head[0] + d * (-u[0] - w[0]);
+		y = head[1] + d * (-u[1] - w[1]);
+		z = head[2] + d * (-u[2] - w[2]);
+		glBegin(GL_LINE_STRIP);
+		glVertex3fv(head);
+		glVertex3f(x, y, z);
+		glEnd();
+	}
+
+	if (axis != Y)
+	{
+		Cross(w, ayy, v);
+		(void)Unit(v, v);
+		Cross(v, w, u);
+		x = head[0] + d * (u[0] - w[0]);
+		y = head[1] + d * (u[1] - w[1]);
+		z = head[2] + d * (u[2] - w[2]);
+		glBegin(GL_LINE_STRIP);
+		glVertex3fv(head);
+		glVertex3f(x, y, z);
+		glEnd();
+		x = head[0] + d * (-u[0] - w[0]);
+		y = head[1] + d * (-u[1] - w[1]);
+		z = head[2] + d * (-u[2] - w[2]);
+		glBegin(GL_LINE_STRIP);
+		glVertex3fv(head);
+		glVertex3f(x, y, z);
+		glEnd();
+	}
+
+	if (axis != Z)
+	{
+		Cross(w, azz, v);
+		(void)Unit(v, v);
+		Cross(v, w, u);
+		x = head[0] + d * (u[0] - w[0]);
+		y = head[1] + d * (u[1] - w[1]);
+		z = head[2] + d * (u[2] - w[2]);
+		glBegin(GL_LINE_STRIP);
+		glVertex3fv(head);
+		glVertex3f(x, y, z);
+		glEnd();
+		x = head[0] + d * (-u[0] - w[0]);
+		y = head[1] + d * (-u[1] - w[1]);
+		z = head[2] + d * (-u[2] - w[2]);
+		glBegin(GL_LINE_STRIP);
+		glVertex3fv(head);
+		glVertex3f(x, y, z);
+		glEnd();
+	}
+}
+
+
+
+float
+Dot(float va[3], float vb[3])
+{
+	return(va[0] * vb[0] + va[1] * vb[1] + va[2] * vb[2]);
+}
+
+
+
+void
+Cross(float va[3], float vb[3], float vout[3])
+{
+	float tmp[3];
+
+	tmp[0] = va[1] * vb[2] - vb[1] * va[2];
+	tmp[1] = vb[0] * va[2] - va[0] * vb[2];
+	tmp[2] = va[0] * vb[1] - vb[0] * va[1];
+
+	vout[0] = tmp[0];
+	vout[1] = tmp[1];
+	vout[2] = tmp[2];
+}
+
+
+
+float
+Unit(float vin[3], float vout[3])
+{
+	float dist = vin[0] * vin[0] + vin[1] * vin[1] + vin[2] * vin[2];
+	if (dist > 0.0)
+	{
+		dist = sqrt(dist);
+		vout[0] = vin[0] / dist;
+		vout[1] = vin[1] / dist;
+		vout[2] = vin[2] / dist;
+	}
+	else
+	{
+		vout[0] = vin[0];
+		vout[1] = vin[1];
+		vout[2] = vin[2];
+	}
+
+	return dist;
+}
+
 struct node
 {
 	float x, y, z;          // location
@@ -62,6 +242,8 @@ public:
 
 	vector(float xIn, float yIn, float zIn, int step)
 	{
+		const float maxSpeed = 2.0f;
+
 		x = xIn;
 		y = yIn;
 		z = zIn;
@@ -82,8 +264,28 @@ public:
 
 		curl = sqrt(cx*cx + cy * cy + cz * cz);
 		speed = sqrt(SQR(vxp) + SQR(vyp) + SQR(vzp));
-		r = 1.f;
-		g = b = 0.f;
+		
+		if (speed > .66)
+		{
+			r = 1.f;
+			if (speed - .66f > .66f)
+			{
+				g = 1.f;
+				b = (speed - 1.33f) / .66f;
+			}
+			else
+			{
+				g = (speed - .66f) / .66f;
+				b = 0.f;
+			}
+				
+		}
+		else
+		{
+			r = speed / .66f;
+			g = 0.f;
+			b = 0.f;
+		}
 
 		tail[0] = x - .5 * 1 / ((float)step) * vxp;
 		tail[1] = y - .5 * 1 / ((float)step) * vyp;
@@ -101,6 +303,21 @@ public:
 	float getSpeed()
 	{
 		return speed;
+	}
+
+	float * getTail()
+	{
+		return tail;
+	}
+
+	float * getHead()
+	{
+		return head;
+	}
+
+	void colorVect()
+	{
+		glColor3f(r, g, b);
 	}
 };
 
@@ -242,6 +459,10 @@ const float GMIN = {  0.00f };
 const float GMAX = { 300.00f };
 const float KMIN = { 1.00f };
 const float KMAX = { 100.00f };
+const float curlMin = { 0.00f };
+const float curlMax = { 3.00f };
+const float speedMin = { 0.f };
+const float speedMax = { 2.4f };
 
 
 const float SMIN = {   0.0 };
@@ -257,6 +478,8 @@ const int GRIDSKIP = { 4 };
 #define G	5
 #define DIST 8
 #define K	9
+#define CurlID 10
+#define SpeedID	11
 
 const char *SFORMAT = { "S: %.3f - %.3f" };
 const char *XFORMAT = { "X: %.3f - %.3f" };
@@ -265,13 +488,15 @@ const char *ZFORMAT = { "Z: %.3f - %.3f" };
 const char *RFORMAT = { "R: %.3f - %.3f" };
 const char *GFORMAT = { "G: %.3f - %.3f" };
 const char *KFORMAT = { "K: %.3f - %.3f" };
+const char *CurlFORMAT = { "Curl: %.3f - %.3f" };
+const char *SpeedFORMAT = { "Speed: %.3f - %.3f" };
 
 const int SLIDERWIDTH = { 200 };
 
 
 // how much to divide the plane and volume:
 
-#define N	30
+#define N	12
 #define NX	N
 #define NY	N
 #define NZ	N
@@ -308,6 +533,8 @@ float		ZLowHigh[2];
 float		RLowHigh[2];
 float		GLowHigh[2];
 float		KLowHigh[2];
+float		CurlLowHigh[2];
+float		SpeedLowHigh[2];
 
 GLUI_StaticText * SLabel;
 GLUI_StaticText * XLabel;
@@ -316,6 +543,8 @@ GLUI_StaticText * ZLabel;
 GLUI_StaticText * RLabel;
 GLUI_StaticText * GLabel;
 GLUI_StaticText * KLabel;
+GLUI_StaticText * CurlLabel;
+GLUI_StaticText * SpeedLabel;
 
 
 // function prototypes:
@@ -705,14 +934,55 @@ Display( )
 	}
 	*/
 
-	//project 6
+	//project 5
+
+	glBegin(GL_LINE_STRIP);
+	glColor3f(1., 1., 1.);
+
+	glVertex3f(-1., -1., -1.);
+	glVertex3f(1., -1., -1.);
+	glVertex3f(1., -1., 1.);
+	glVertex3f(-1., -1., 1.);
+	glVertex3f(-1., -1., -1.);
+	glEnd();
+
+	glBegin(GL_LINE_STRIP);
+	glVertex3f(-1., 1., -1.);
+	glVertex3f(1., 1., -1.);
+	glVertex3f(1., 1., 1.);
+	glVertex3f(-1., 1., 1.);
+	glVertex3f(-1., 1., -1.);
+	glEnd();
+
+	glBegin(GL_LINE_STRIP);
+	glVertex3f(-1., -1., -1.);
+	glVertex3f(-1., 1., -1.);
+	glVertex3f(-1., 1., 1.);
+	glVertex3f(-1., -1., 1.);
+	glVertex3f(-1., -1., -1.);
+	glEnd();
+
+	glBegin(GL_LINE_STRIP);
+	glVertex3f(1., -1., -1.);
+	glVertex3f(1., 1., -1.);
+	glVertex3f(1., 1., 1.);
+	glVertex3f(1., -1., 1.);
+	glVertex3f(1., -1., -1.);
+	glEnd();
+
 	for (int i = 0; i < N; i++)
 	{
 		for (int j = 0; j < N; j++)
 		{
 			for (int k = 0; k < N; k++)
 			{
-				
+				if (vect[i][j][k].getCurl() < CurlLowHigh[0] || vect[i][j][k].getCurl() > CurlLowHigh[1])
+					continue;
+				if (vect[i][j][k].getSpeed() < SpeedLowHigh[0] || vect[i][j][k].getSpeed() > SpeedLowHigh[1])
+					continue;
+
+				vect[i][j][k].colorVect();
+				Arrow(vect[i][j][k].getTail(), vect[i][j][k].getHead());
 			}
 		}
 	}
@@ -986,7 +1256,7 @@ InitGlui( )
 	//Project 1 & 2
 	GLUI_Panel * panel = Glui->add_panel(  "" );
 	//Glui->add_checkbox_to_panel( panel, "Points", &PointsOn );
-	Glui->add_checkbox_to_panel(panel, "Jitter", &jitter);
+	//Glui->add_checkbox_to_panel(panel, "Jitter", &jitter);
 
 
 	GLUI_Rollout * rollout = Glui->add_rollout("Range Sliders", true);
@@ -995,8 +1265,8 @@ InitGlui( )
 	//Glui->add_checkbox( "Grayscale", &Grayscale );
 	//Glui->add_checkbox("Cartesian", &Cartesian);
 	//Glui->add_checkbox("Fix T-Intersections", &draw);
-
-	/*GLUI_HSlider * slider = Glui->add_slider_to_panel(rollout, false, GLUI_HSLIDER_FLOAT, KLowHigh, K, (GLUI_Update_CB)Sliders);
+	/*
+	GLUI_HSlider * slider = Glui->add_slider_to_panel(rollout, false, GLUI_HSLIDER_FLOAT, KLowHigh, K, (GLUI_Update_CB)Sliders);
 	slider->set_float_limits(KMIN, KMAX);
 	slider->set_slider_val(KLowHigh[0], KLowHigh[1]);
 	slider->set_w(SLIDERWIDTH);
@@ -1030,7 +1300,7 @@ InitGlui( )
 	sprintf( str, SFORMAT, SLowHigh[0], SLowHigh[1] );
 	SLabel = Glui->add_statictext_to_panel( rollout, str );
 	Glui->add_separator_to_panel( rollout );
-
+	
 	slider = Glui->add_slider_to_panel( rollout, true, GLUI_HSLIDER_FLOAT, XLowHigh, X, (GLUI_Update_CB) Sliders );
 	slider->set_float_limits( XMIN, XMAX );
 	slider->set_slider_val( XLowHigh[0], XLowHigh[1] );
@@ -1088,6 +1358,22 @@ InitGlui( )
 	Glui->add_separator_to_panel(rollout);
 	*/
 	
+	//project 5
+	GLUI_HSlider * slider = Glui->add_slider_to_panel(rollout, true, GLUI_HSLIDER_FLOAT, CurlLowHigh, CurlID, (GLUI_Update_CB)Sliders);
+	slider->set_float_limits(curlMin, curlMax);
+	slider->set_slider_val(CurlLowHigh[0], CurlLowHigh[1]);
+	slider->set_w(SLIDERWIDTH);
+	sprintf(str, CurlFORMAT, CurlLowHigh[0], CurlLowHigh[1]);
+	CurlLabel = Glui->add_statictext_to_panel(rollout, str);
+	Glui->add_separator_to_panel(rollout);
+
+	slider = Glui->add_slider_to_panel(rollout, true, GLUI_HSLIDER_FLOAT, SpeedLowHigh, SpeedID, (GLUI_Update_CB)Sliders);
+	slider->set_float_limits(speedMin, speedMax);
+	slider->set_slider_val(SpeedLowHigh[0], SpeedLowHigh[1]);
+	slider->set_w(SLIDERWIDTH);
+	sprintf(str, SpeedFORMAT, SpeedLowHigh[0], SpeedLowHigh[1]);
+	SpeedLabel = Glui->add_statictext_to_panel(rollout, str);
+	Glui->add_separator_to_panel(rollout);
 
 	Glui->add_checkbox( "Perspective", &WhichProjection );
 
@@ -1226,7 +1512,8 @@ InitGraphics( )
 	fclose(fp);
 	*/
 
-	//project 6
+
+	//project 5
 	for (int i = 0; i < N; i++)
 	{
 		for (int j = 0; j < N; j++)
@@ -1505,6 +1792,10 @@ Reset( )
 	GLowHigh[1] = GMAX;
 	KLowHigh[0] = 10.f;
 	KLowHigh[1] = KMAX;
+	CurlLowHigh[0] = curlMin;
+	CurlLowHigh[1] = curlMax;
+	SpeedLowHigh[0] = speedMin;
+	SpeedLowHigh[1] = speedMax;
 }
 
 
@@ -1575,6 +1866,16 @@ Sliders( int id )
 		case K:
 			sprintf(str, KFORMAT, KLowHigh[0], KLowHigh[1]);
 			DistLabel->set_text(str);
+			break;
+
+		case CurlID:
+			sprintf(str, CurlFORMAT, CurlLowHigh[0], CurlLowHigh[1]);
+			CurlLabel->set_text(str);
+			break;
+
+		case SpeedID:
+			sprintf(str, SpeedFORMAT, SpeedLowHigh[0], SpeedLowHigh[1]);
+			SpeedLabel->set_text(str);
 			break;
 	}
 
