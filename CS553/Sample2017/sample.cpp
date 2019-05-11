@@ -350,7 +350,7 @@ public:
 
 // title of these windows:
 
-const char *WINDOWTITLE = { "Assignment 4 - Richard Cunard" };
+const char *WINDOWTITLE = { "Assignment 5 - Richard Cunard" };
 const char *GLUITITLE   = { "User Interface Window" };
 
 

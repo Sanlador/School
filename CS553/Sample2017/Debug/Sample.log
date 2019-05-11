@@ -13,6 +13,6 @@ c:\users\sanlador\documents\github\school\cs553\sample2017\sample.cpp(292): warn
 c:\users\sanlador\documents\github\school\cs553\sample2017\sample.cpp(293): warning C4244: '=': conversion from 'double' to 'float', possible loss of data
 c:\users\sanlador\documents\github\school\cs553\sample2017\sample.cpp(294): warning C4244: '=': conversion from 'double' to 'float', possible loss of data
 c:\users\sanlador\documents\github\school\cs553\sample2017\sample.cpp(295): warning C4244: '=': conversion from 'double' to 'float', possible loss of data
-c:\users\sanlador\documents\github\school\cs553\sample2017\sample.cpp(1526): warning C4244: 'argument': conversion from 'double' to 'float', possible loss of data
+c:\users\sanlador\documents\github\school\cs553\sample2017\sample.cpp(1523): warning C4244: 'argument': conversion from 'double' to 'float', possible loss of data
 sample.obj : warning LNK4075: ignoring '/EDITANDCONTINUE' due to '/INCREMENTAL:NO' specification
   Sample.vcxproj -> C:\Users\Sanlador\Documents\GitHub\School\CS553\Sample2017\.\Debug\Sample.exe
